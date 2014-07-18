@@ -4,17 +4,21 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui\
+            multimedia \
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets \
+                                        multimediawidgets
 
 TARGET = Zpotify
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-        mainwindow.cpp
+SOURCES +=  main.cpp\
+            mainwindow.cpp \
+            playercontrols.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+            playercontrols.h
 
 FORMS    += mainwindow.ui

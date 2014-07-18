@@ -1,5 +1,8 @@
 #include "mainwindow.h"
 #include <QApplication>
+#include <QtMultimediaWidgets>
+#include <QtWidgets>
+#include <QtMultimedia>
 
 int main(int argc, char *argv[])
 {
