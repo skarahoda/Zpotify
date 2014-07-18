@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui\
-            multimedia \
+            multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets \
                                         multimediawidgets
@@ -15,10 +15,8 @@ TEMPLATE = app
 
 
 SOURCES +=  main.cpp\
-            mainwindow.cpp \
-            playercontrols.cpp
+            mainwindow.cpp
 
-HEADERS  += mainwindow.h \
-            playercontrols.h
+HEADERS  += mainwindow.h
 
 FORMS    += mainwindow.ui

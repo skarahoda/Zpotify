@@ -10,7 +10,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    //PlayerControls *controls = new PlayerControls(this);
 }
 
 MainWindow::~MainWindow()
