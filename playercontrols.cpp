@@ -56,7 +56,6 @@ PlayerControls::PlayerControls(QWidget *parent)
     , previousButton(0)
     , muteButton(0)
     , volumeSlider(0)
-    , rateBox(0)
 {
     playButton = new QToolButton(this);
     playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
@@ -170,27 +169,4 @@ void PlayerControls::playClicked()
 void PlayerControls::muteClicked()
 {
     emit changeMuting(!playerMuted);
-}
-
-qreal PlayerControls::playbackRate() const
-{
-    return rateBox->itemData(rateBox->currentIndex()).toDouble();
-}
-
-void PlayerControls::setPlaybackRate(float rate)
-{
-    for (int i = 0; i < rateBox->count(); ++i) {
-        if (qFuzzyCompare(rate, float(rateBox->itemData(i).toDouble()))) {
-            rateBox->setCurrentIndex(i);
-            return;
-        }
-    }
-
-    rateBox->addItem(QString("%1x").arg(rate), QVariant(rate));
-    rateBox->setCurrentIndex(rateBox->count() - 1);
-}
-
-void PlayerControls::updateRate()
-{
-    emit changeRate(playbackRate());
 }

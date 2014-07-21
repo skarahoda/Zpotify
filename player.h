@@ -38,25 +38,80 @@
 **
 ****************************************************************************/
 
-#include "player.h"
+#ifndef PLAYER_H
+#define PLAYER_H
 
-#include <QApplication>
+#include <QWidget>
+#include <QMediaPlayer>
+#include <QMediaPlaylist>
+#include <QTreeWidget>
 
-int main(int argc, char *argv[])
+QT_BEGIN_NAMESPACE
+class QAbstractItemView;
+class QLabel;
+class QMediaPlayer;
+class QModelIndex;
+class QPushButton;
+class QSlider;
+class QVideoProbe;
+class QVideoWidget;
+QT_END_NAMESPACE
+
+class PlaylistModel;
+class HistogramWidget;
+
+class Player : public QWidget
 {
-#ifdef Q_WS_MAEMO_6
-    //Meego graphics system conflicts with xvideo during fullscreen transition
-    QApplication::setGraphicsSystem("raster");
-#endif
-    QApplication app(argc, argv);
+    Q_OBJECT
 
-    Player player;
+public:
+    Player(QWidget *parent = 0);
+    ~Player();
 
-#if defined(Q_WS_SIMULATOR)
-    player.setAttribute(Qt::WA_LockLandscapeOrientation);
-    player.showMaximized();
-#else
-    player.show();
-#endif
-    return app.exec();
-}
+signals:
+    void fullScreenChanged(bool fullScreen);
+
+private slots:
+    void open();
+    void durationChanged(qint64 duration);
+    void positionChanged(qint64 progress);
+    void metaDataChanged();
+
+    void previousClicked();
+
+    void seek(int seconds);
+    void jump(const QModelIndex &index);
+    void playlistPositionChanged(int);
+
+    void statusChanged(QMediaPlayer::MediaStatus status);
+    void bufferingProgress(int progress);
+
+    void displayErrorMessage();
+
+    void addToPlaylist(const QStringList &fileNames);
+
+private:
+    void addArtist(const QString &artistName);
+    void addSong(const QString &artistName, const QString &songName);
+    void setTrackInfo(const QString &info);
+    void setStatusInfo(const QString &info);
+    void handleCursor(QMediaPlayer::MediaStatus status);
+    void updateDurationInfo(qint64 currentInfo);
+
+
+    QMediaPlayer *player;
+    QMediaPlaylist *playlist;
+    QTreeWidget *fileWidget;
+    QLabel *coverLabel;
+    QSlider *slider;
+    QLabel *labelDuration;
+
+
+    PlaylistModel *playlistModel;
+    QAbstractItemView *playlistView;
+    QString trackInfo;
+    QString statusInfo;
+    qint64 duration;
+};
+
+#endif // PLAYER_H

@@ -38,25 +38,51 @@
 **
 ****************************************************************************/
 
-#include "player.h"
+#ifndef PLAYLISTMODEL_H
+#define PLAYLISTMODEL_H
 
-#include <QApplication>
+#include <QAbstractItemModel>
 
-int main(int argc, char *argv[])
+QT_BEGIN_NAMESPACE
+class QMediaPlaylist;
+QT_END_NAMESPACE
+
+class PlaylistModel : public QAbstractItemModel
 {
-#ifdef Q_WS_MAEMO_6
-    //Meego graphics system conflicts with xvideo during fullscreen transition
-    QApplication::setGraphicsSystem("raster");
-#endif
-    QApplication app(argc, argv);
+    Q_OBJECT
 
-    Player player;
+public:
+    enum Column
+    {
+        Title = 0,
+        ColumnCount
+    };
 
-#if defined(Q_WS_SIMULATOR)
-    player.setAttribute(Qt::WA_LockLandscapeOrientation);
-    player.showMaximized();
-#else
-    player.show();
-#endif
-    return app.exec();
-}
+    PlaylistModel(QObject *parent = 0);
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const;
+
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
+    QModelIndex parent(const QModelIndex &child) const;
+
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+
+    QMediaPlaylist *playlist() const;
+    void setPlaylist(QMediaPlaylist *playlist);
+
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole);
+
+private slots:
+    void beginInsertItems(int start, int end);
+    void endInsertItems();
+    void beginRemoveItems(int start, int end);
+    void endRemoveItems();
+    void changeItems(int start, int end);
+
+private:
+    QMediaPlaylist *m_playlist;
+    QMap<QModelIndex, QVariant> m_data;
+};
+
+#endif // PLAYLISTMODEL_H
