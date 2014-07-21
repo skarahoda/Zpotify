@@ -72,7 +72,7 @@ signals:
     void fullScreenChanged(bool fullScreen);
 
 private slots:
-    void open();
+    void addToPlaylist(QTreeWidgetItem *current);
     void durationChanged(qint64 duration);
     void positionChanged(qint64 progress);
     void metaDataChanged();
@@ -88,11 +88,10 @@ private slots:
 
     void displayErrorMessage();
 
-    void addToPlaylist(const QStringList &fileNames);
-
 private:
-    void addArtist(const QString &artistName);
-    void addSong(const QString &artistName, const QString &songName);
+    QTreeWidgetItem * addArtist(const QString &artistName);
+    void addSong(const QString &artistName, const QString &albumName, const QString &songName, const QString &ID);
+    QTreeWidgetItem * addAlbum(QTreeWidgetItem * artist, const QString &albumName);
     void setTrackInfo(const QString &info);
     void setStatusInfo(const QString &info);
     void handleCursor(QMediaPlayer::MediaStatus status);

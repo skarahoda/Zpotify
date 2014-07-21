@@ -73,6 +73,9 @@ Player::Player(QWidget *parent)
 
 //! [2]
     fileWidget = new QTreeWidget(this);
+    fileWidget->setColumnCount(1);
+    fileWidget->header()->hide();
+    connect(fileWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), SLOT(addToPlaylist(QTreeWidgetItem*)));
 
     playlistModel = new PlaylistModel(this);
     playlistModel->setPlaylist(playlist);
@@ -89,10 +92,6 @@ Player::Player(QWidget *parent)
 
     labelDuration = new QLabel(this);
     connect(slider, SIGNAL(sliderMoved(int)), this, SLOT(seek(int)));
-
-    QPushButton *openButton = new QPushButton(tr("Open"), this);
-
-    connect(openButton, SIGNAL(clicked()), this, SLOT(open()));
 
     PlayerControls *controls = new PlayerControls(this);
     controls->setState(player->state());
@@ -118,7 +117,6 @@ Player::Player(QWidget *parent)
 
     QBoxLayout *controlLayout = new QHBoxLayout;
     controlLayout->setMargin(0);
-    controlLayout->addWidget(openButton);
     controlLayout->addStretch(1);
     controlLayout->addWidget(controls);
     controlLayout->addStretch(1);
@@ -140,45 +138,48 @@ Player::Player(QWidget *parent)
 
         controls->setEnabled(false);
         playlistView->setEnabled(false);
-        openButton->setEnabled(false);
     }
 
-    metaDataChanged();
-
-    QStringList arguments = qApp->arguments();
-    arguments.removeAt(0);
-    addToPlaylist(arguments);
-
-    addArtist(tr("Black Keys"));
-    addSong(tr("Black Keys"),tr("Lonely Boy"));
+    addSong(tr("The Black Keys"),tr("El Camino"),tr("Lonely Boy"),tr("1"));
+    addSong(tr("The Black Keys"),tr("El Camino"),tr("Dead and Gone"),tr("2"));
+    addSong(tr("The Black Keys"),tr("Turn Blue"),tr("In Time"),tr("3"));
+    addSong(tr("The Black Keys"),tr("Turn Blue"),tr("Fever"),tr("4"));
 }
 
 Player::~Player()
 {
 }
 
-void Player::open()
-{
-    QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Open Files"));
-    addToPlaylist(fileNames);
-}
 
-void Player::addToPlaylist(const QStringList& fileNames)
+void Player::addToPlaylist(QTreeWidgetItem* current)
 {
-    foreach (QString const &argument, fileNames) {
-        QFileInfo fileInfo(argument);
-        if (fileInfo.exists()) {
-            QUrl url = QUrl::fromLocalFile(fileInfo.absoluteFilePath());
-            if (fileInfo.suffix().toLower() == QLatin1String("m3u")) {
-                playlist->load(url);
-            } else
-                playlist->addMedia(url);
-        } else {
-            QUrl url(argument);
-            if (url.isValid()) {
+    QTreeWidgetItem *albumItem;
+    QTreeWidgetItem *songItem;
+    switch (current->text(1).toInt()) {
+    case -2:
+        for (int i = 0; i < current->childCount(); i++) {
+            albumItem = current->child(i);
+            for (int j = 0; j < albumItem->childCount(); j++) {
+                songItem = albumItem->child(j);
+                QString stringURL = songItem->text(0);
+                QUrl url(stringURL);
                 playlist->addMedia(url);
             }
         }
+        break;
+    case -1:
+        for (int i = 0; i < current->childCount(); i++) {
+            songItem = current->child(i);
+            QString stringURL = songItem->text(0);
+            QUrl url(stringURL);
+            playlist->addMedia(url);
+        }
+        break;
+    default:
+        QString stringURL = current->text(0);
+        QUrl url(stringURL);
+        playlist->addMedia(url);
+        break;
     }
 }
 
@@ -323,16 +324,49 @@ void Player::updateDurationInfo(qint64 currentInfo)
     labelDuration->setText(tStr);
 }
 
-void Player::addArtist(const QString &artistName)
+QTreeWidgetItem * Player::addArtist(const QString &artistName)
 {
     QTreeWidgetItem *artist = new QTreeWidgetItem(fileWidget);
     artist->setText(0, artistName);
+    artist->setText(1,tr("-2"));
+    return artist;
 }
 
-void Player::addSong(const QString &artistName, const QString &songName)
+void Player::addSong(const QString &artistName, const QString &albumName, const QString &songName, const QString &ID)
 {
-    QTreeWidgetItem *artist = (fileWidget->findItems(artistName, Qt::MatchExactly, 0))[0];
-    QTreeWidgetItem *song = new QTreeWidgetItem(artist);
+    //find the artist
+    QList<QTreeWidgetItem *> artistList = (fileWidget->findItems(artistName, Qt::MatchExactly, 0));
+    QTreeWidgetItem * artist;
+    //if the artist is not in the tree then add to the tree
+    if (artistList.empty())
+        artist = addArtist(artistName);
+    else
+        artist = artistList[0];
+
+    //find the album
+    QTreeWidgetItem * album;
+    for (int i=0; i < artist->childCount(); i++) {
+        album = artist->child(i);
+        if(album->text(0) == albumName)
+        {
+            QTreeWidgetItem *song = new QTreeWidgetItem(album);
+            song->setText(0,songName);
+            song->setText(1,ID);
+            return;
+        }
+    }
+    //if the album is not in the tree then add to tree
+    album = addAlbum(artist,albumName);
+    QTreeWidgetItem *song = new QTreeWidgetItem(album);
     song->setText(0,songName);
+    song->setText(1,ID);
+    return;
 }
 
+QTreeWidgetItem * Player::addAlbum(QTreeWidgetItem * artist, const QString &albumName)
+{
+    QTreeWidgetItem *album = new QTreeWidgetItem(artist);
+    album->setText(0,albumName);
+    album->setText(1,tr("-1"));
+    return album;
+}

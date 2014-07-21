@@ -16,9 +16,5 @@ SOURCES = main.cpp \
     playercontrols.cpp \
     playlistmodel.cpp
 
-maemo* {
-    DEFINES += PLAYER_NO_COLOROPTIONS
-}
-
 target.path = $$[QT_INSTALL_EXAMPLES]/multimediawidgets/player
 INSTALLS += target
