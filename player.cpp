@@ -48,6 +48,13 @@
 #include <QVideoProbe>
 #include <QMediaMetaData>
 #include <QtWidgets>
+#include <QCoreApplication>
+#include <QSqlDatabase>
+#include <QSqlError>
+#include <QSqlQuery>
+#include <QDebug>
+#include <stdio.h>
+#include <qtextstream.h>
 
 Player::Player(QWidget *parent)
     : QWidget(parent)
@@ -55,13 +62,14 @@ Player::Player(QWidget *parent)
     , coverLabel(0)
     , slider(0)
 {
+    QString ip_addr = "192.168.2.62";
     setWindowTitle(tr("Zpotify") + QChar(0x2122));
-//! [create-objs]
+    //! [create-objs]
     player = new QMediaPlayer(this);
     // owned by PlaylistModel
     playlist = new QMediaPlaylist();
     player->setPlaylist(playlist);
-//! [create-objs]
+    //! [create-objs]
 
     connect(player, SIGNAL(durationChanged(qint64)), SLOT(durationChanged(qint64)));
     connect(player, SIGNAL(positionChanged(qint64)), SLOT(positionChanged(qint64)));
@@ -72,7 +80,7 @@ Player::Player(QWidget *parent)
     connect(player, SIGNAL(bufferStatusChanged(int)), this, SLOT(bufferingProgress(int)));
     connect(player, SIGNAL(error(QMediaPlayer::Error)), this, SLOT(displayErrorMessage()));
 
-//! [2]
+    //! [2]
     fileWidget = new QTreeWidget(this);
     fileWidget->setColumnCount(1);
     fileWidget->header()->hide();
@@ -80,7 +88,7 @@ Player::Player(QWidget *parent)
 
     playlistModel = new PlaylistModel(this);
     playlistModel->setPlaylist(playlist);
-//! [2]
+    //! [2]
 
     menuBar = new QMenuBar(this);
 
@@ -88,6 +96,7 @@ Player::Player(QWidget *parent)
     connectAct->setShortcut(tr("Ctrl+C"));
     connectAct->setStatusTip(tr("Ctrl+C"));
     menuBar->addAction(connectAct);
+    connect(connectAct,SIGNAL(triggered()),this,SLOT(clearList()));
 
     clearAct = new QAction("Clear",menuBar);
     clearAct->setShortcut(Qt::Key_Delete);
@@ -155,16 +164,37 @@ Player::Player(QWidget *parent)
         playlistView->setEnabled(false);
     }
 
-    addSong(tr("The Black Keys"),tr("El Camino"),tr("Lonely Boy"),tr("1"));
-    addSong(tr("The Black Keys"),tr("El Camino"),tr("Dead and Gone"),tr("2"));
-    addSong(tr("The Black Keys"),tr("Turn Blue"),tr("In Time"),tr("3"));
-    addSong(tr("The Black Keys"),tr("Turn Blue"),tr("Fever"),tr("4"));
+    getSQL();
 }
 
 Player::~Player()
 {
 }
 
+int Player::getSQL(){
+    QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
+    db.setHostName("192.168.2.62");
+    db.setDatabaseName("ampache");
+    db.setUserName("listen");
+    db.setPassword("1234");
+    if (!db.open())
+    {
+        QTextStream(stdout) << "User    : " + db.userName()     << endl;
+        QTextStream(stdout) << "Password: " + db.password()     << endl;
+        QTextStream(stdout) << "Database: " + db.databaseName() << endl;
+        QTextStream(stdout) << "HostName: " + db.hostName()     << endl;
+        QTextStream(stdout) << ""                               << endl;
+        QTextStream(stdout) << db.lastError().text() << endl;
+    }
+
+    QSqlQuery query;
+    QString qur = "SELECT artist.name, album.name, song.title, song.id from song inner join album on album.id=song.album inner join artist on artist.id=song.artist order by artist.name, album.name, song.track";
+    query.exec(qur);
+    while(query.next()) {
+        addSong(query.value(0).toString(), query.value(1).toString(), query.value(2).toString(), query.value(3).toString());
+    }
+    return 1;
+}
 
 void Player::addToPlaylist(QTreeWidgetItem* current)
 {
@@ -176,7 +206,7 @@ void Player::addToPlaylist(QTreeWidgetItem* current)
             albumItem = current->child(i);
             for (int j = 0; j < albumItem->childCount(); j++) {
                 songItem = albumItem->child(j);
-                QString stringURL = songItem->text(0);
+                QString stringURL = "http://192.168.2.62/ampache/play/index.php?ssid=6931&type=song&oid="+songItem->text(1)+"&uid=2";
                 QUrl url(stringURL);
                 playlist->addMedia(url);
             }
@@ -185,13 +215,13 @@ void Player::addToPlaylist(QTreeWidgetItem* current)
     case -1:
         for (int i = 0; i < current->childCount(); i++) {
             songItem = current->child(i);
-            QString stringURL = songItem->text(0);
+            QString stringURL = "http://192.168.2.62/ampache/play/index.php?ssid=6931&type=song&oid="+songItem->text(1)+"&uid=2";
             QUrl url(stringURL);
             playlist->addMedia(url);
         }
         break;
     default:
-        QString stringURL = current->text(0);
+        QString stringURL = "http://192.168.2.62/ampache/play/index.php?ssid=6931&type=song&oid="+current->text(1)+"&uid=2";
         QUrl url(stringURL);
         playlist->addMedia(url);
         break;
@@ -216,15 +246,15 @@ void Player::metaDataChanged()
 {
     if (player->isMetaDataAvailable()) {
         setTrackInfo(QString("%1 - %2")
-                .arg(player->metaData(QMediaMetaData::AlbumArtist).toString())
-                .arg(player->metaData(QMediaMetaData::Title).toString()));
+                     .arg(player->metaData(QMediaMetaData::AlbumArtist).toString())
+                     .arg(player->metaData(QMediaMetaData::Title).toString()));
 
         if (coverLabel) {
             QUrl url = player->metaData(QMediaMetaData::CoverArtUrlLarge).value<QUrl>();
 
             coverLabel->setPixmap(!url.isEmpty()
-                    ? QPixmap(url.toString())
-                    : QPixmap());
+                                  ? QPixmap(url.toString())
+                                  : QPixmap());
         }
     }
 }
@@ -289,8 +319,8 @@ void Player::handleCursor(QMediaPlayer::MediaStatus status)
 {
 #ifndef QT_NO_CURSOR
     if (status == QMediaPlayer::LoadingMedia ||
-        status == QMediaPlayer::BufferingMedia ||
-        status == QMediaPlayer::StalledMedia)
+            status == QMediaPlayer::BufferingMedia ||
+            status == QMediaPlayer::StalledMedia)
         setCursor(QCursor(Qt::BusyCursor));
     else
         unsetCursor();

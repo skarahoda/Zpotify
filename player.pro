@@ -5,7 +5,8 @@ QT += network \
       xml \
       multimedia \
       multimediawidgets \
-      widgets
+      widgets \
+      sql
 
 HEADERS = \
     player.h \
