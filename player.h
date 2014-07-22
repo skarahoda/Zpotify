@@ -45,6 +45,7 @@
 #include <QMediaPlayer>
 #include <QMediaPlaylist>
 #include <QTreeWidget>
+#include <QMenuBar>
 
 QT_BEGIN_NAMESPACE
 class QAbstractItemView;
@@ -55,10 +56,10 @@ class QPushButton;
 class QSlider;
 class QVideoProbe;
 class QVideoWidget;
+class QMenuBar;
 QT_END_NAMESPACE
 
 class PlaylistModel;
-class HistogramWidget;
 
 class Player : public QWidget
 {
@@ -88,6 +89,8 @@ private slots:
 
     void displayErrorMessage();
 
+    void clearList();
+
 private:
     QTreeWidgetItem * addArtist(const QString &artistName);
     void addSong(const QString &artistName, const QString &albumName, const QString &songName, const QString &ID);
@@ -104,6 +107,9 @@ private:
     QLabel *coverLabel;
     QSlider *slider;
     QLabel *labelDuration;
+    QMenuBar *menuBar;
+    QAction *connectAct;
+    QAction *clearAct;
 
 
     PlaylistModel *playlistModel;

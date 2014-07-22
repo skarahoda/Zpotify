@@ -55,6 +55,7 @@ Player::Player(QWidget *parent)
     , coverLabel(0)
     , slider(0)
 {
+    setWindowTitle(tr("Zpotify") + QChar(0x2122));
 //! [create-objs]
     player = new QMediaPlayer(this);
     // owned by PlaylistModel
@@ -80,6 +81,19 @@ Player::Player(QWidget *parent)
     playlistModel = new PlaylistModel(this);
     playlistModel->setPlaylist(playlist);
 //! [2]
+
+    menuBar = new QMenuBar(this);
+
+    connectAct = new QAction("&Connect",menuBar);
+    connectAct->setShortcut(tr("Ctrl+C"));
+    connectAct->setStatusTip(tr("Ctrl+C"));
+    menuBar->addAction(connectAct);
+
+    clearAct = new QAction("Clear",menuBar);
+    clearAct->setShortcut(Qt::Key_Delete);
+    clearAct->setStatusTip(tr("Delete"));
+    menuBar->addAction(clearAct);
+    connect(clearAct,SIGNAL(triggered()),this,SLOT(clearList()));
 
     playlistView = new QListView(this);
     playlistView->setModel(playlistModel);
@@ -112,8 +126,8 @@ Player::Player(QWidget *parent)
     connect(player, SIGNAL(mutedChanged(bool)), controls, SLOT(setMuted(bool)));
 
     QBoxLayout *displayLayout = new QHBoxLayout;
-    displayLayout->addWidget(fileWidget, 2);
-    displayLayout->addWidget(playlistView);
+    displayLayout->addWidget(fileWidget, 1);
+    displayLayout->addWidget(playlistView, 1);
 
     QBoxLayout *controlLayout = new QHBoxLayout;
     controlLayout->setMargin(0);
@@ -122,6 +136,7 @@ Player::Player(QWidget *parent)
     controlLayout->addStretch(1);
 
     QBoxLayout *layout = new QVBoxLayout;
+    layout->addWidget(menuBar);
     layout->addLayout(displayLayout);
     QHBoxLayout *hLayout = new QHBoxLayout;
     hLayout->addWidget(slider);
@@ -369,4 +384,10 @@ QTreeWidgetItem * Player::addAlbum(QTreeWidgetItem * artist, const QString &albu
     album->setText(0,albumName);
     album->setText(1,tr("-1"));
     return album;
+}
+
+void Player::clearList()
+{
+    if(!playlist->clear())
+        QMessageBox::warning(this, tr("List Error"),tr("QMediaPlaylist couldn't clear the list"));
 }
