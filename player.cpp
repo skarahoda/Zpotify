@@ -3,6 +3,7 @@
 
 #include "playercontrols.h"
 #include "playlistmodel.h"
+#include "settingsdialog.h"
 
 #include <QMediaService>
 #include <QMediaPlaylist>
@@ -80,7 +81,8 @@ Player::Player(QWidget *parent)
     connectAct->setStatusTip(tr("Ctrl+C"));
     menuBar->addAction(connectAct);
 
-    connect(connectAct,SIGNAL(triggered()),this,SLOT(clearList()));
+    connect(connectAct,SIGNAL(triggered()),this,SLOT(settings()));
+
 
     clearAct = new QAction("Clear",menuBar);
     clearAct->setShortcut(Qt::Key_Delete);
@@ -216,7 +218,6 @@ void Player::addToPlaylist(QTreeWidgetItem* current)
                 songItem = albumItem->child(j);
                 QString stringURL = "http://"+ip_addr+"/ampache/play/index.php?ssid=6931&type=song&oid="+songItem->text(1)+"&uid=2&name=/" + songItem->text(0);
                 QUrl url(stringURL);
-                playlistModel->songName=songItem->text(0);
                 playlist->addMedia(url);
             }
         }
@@ -227,14 +228,12 @@ void Player::addToPlaylist(QTreeWidgetItem* current)
             songItem = current->child(i);
             QString stringURL = "http://"+ip_addr+"/ampache/play/index.php?ssid=6931&type=song&oid="+songItem->text(1)+"&uid=2&name=/" + songItem->text(0);
             QUrl url(stringURL);
-            playlistModel->songName=songItem->text(0);
             playlist->addMedia(url);
         }
         break;
     default:
         QString stringURL = "http://"+ip_addr+"/ampache/play/index.php?ssid=6931&type=song&oid="+current->text(1)+"&uid=2&name=/" + current->text(0);
         QUrl url(stringURL);
-        playlistModel->songName=current->text(0);
         playlist->addMedia(url);
         break;
     }
@@ -432,4 +431,11 @@ void Player::clearList()
 {
     if(!playlist->clear())
         QMessageBox::warning(this, tr("List Error"),tr("QMediaPlaylist couldn't clear the list"));
+}
+
+void Player::settings()
+{
+    SettingsDialog dialog(this);
+    if(dialog.exec() == QDialog::Accepted)
+         QTextStream(stdout) << "All good\n";
 }

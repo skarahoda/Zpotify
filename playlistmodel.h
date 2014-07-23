@@ -60,7 +60,6 @@ public:
 
     PlaylistModel(QObject *parent = 0);
 
-    QString songName;
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
 

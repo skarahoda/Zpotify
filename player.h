@@ -90,6 +90,7 @@ private slots:
     void displayErrorMessage();
 
     void clearList();
+    void settings();
 
 private:
     QTreeWidgetItem * addArtist(const QString &artistName);
