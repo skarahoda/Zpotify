@@ -25,10 +25,10 @@ Player::Player(QWidget *parent)
     , slider(0)
 {
     //TO BE filled from settings
-    ip_addr = "192.168.2.62";
+    ip_addr  = "192.168.2.62";
     sql_user = "listen";
-    sql_pw = "1234";
-    sql_db = "ampache";
+    sql_pw   = "1234";
+    sql_db   = "ampache";
     //TO BE filled from settings
 
 
@@ -214,7 +214,7 @@ void Player::addToPlaylist(QTreeWidgetItem* current)
             albumItem = current->child(i);
             for (int j = 0; j < albumItem->childCount(); j++) {
                 songItem = albumItem->child(j);
-                QString stringURL = "http://192.168.2.62/ampache/play/index.php?ssid=6931&type=song&oid="+songItem->text(1)+"&uid=2&name=/" + songItem->text(0);
+                QString stringURL = "http://"+ip_addr+"/ampache/play/index.php?ssid=6931&type=song&oid="+songItem->text(1)+"&uid=2&name=/" + songItem->text(0);
                 QUrl url(stringURL);
                 playlistModel->songName=songItem->text(0);
                 playlist->addMedia(url);
@@ -225,14 +225,14 @@ void Player::addToPlaylist(QTreeWidgetItem* current)
         //        clearList();
         for (int i = 0; i < current->childCount(); i++) {
             songItem = current->child(i);
-            QString stringURL = "http://192.168.2.62/ampache/play/index.php?ssid=6931&type=song&oid="+songItem->text(1)+"&uid=2&name=/" + songItem->text(0);
+            QString stringURL = "http://"+ip_addr+"/ampache/play/index.php?ssid=6931&type=song&oid="+songItem->text(1)+"&uid=2&name=/" + songItem->text(0);
             QUrl url(stringURL);
             playlistModel->songName=songItem->text(0);
             playlist->addMedia(url);
         }
         break;
     default:
-        QString stringURL = "http://192.168.2.62/ampache/play/index.php?ssid=6931&type=song&oid="+current->text(1)+"&uid=2&name=/" + current->text(0);
+        QString stringURL = "http://"+ip_addr+"/ampache/play/index.php?ssid=6931&type=song&oid="+current->text(1)+"&uid=2&name=/" + current->text(0);
         QUrl url(stringURL);
         playlistModel->songName=current->text(0);
         playlist->addMedia(url);
