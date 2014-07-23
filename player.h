@@ -101,7 +101,6 @@ private:
     void updateDurationInfo(qint64 currentInfo);
     int getSQL();
 
-
     QMediaPlayer *player;
     QMediaPlaylist *playlist;
     QTreeWidget *fileWidget;
@@ -111,7 +110,8 @@ private:
     QMenuBar *menuBar;
     QAction *connectAct;
     QAction *clearAct;
-
+    // In the header file:
+    QAction *rclickAction;
 
     PlaylistModel *playlistModel;
     QAbstractItemView *playlistView;
