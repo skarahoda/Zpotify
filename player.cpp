@@ -16,6 +16,7 @@
 #include <QDebug>
 #include <stdio.h>
 #include <qtextstream.h>
+#include <QSettings>
 
 Player::Player(QWidget *parent)
     : QWidget(parent)
@@ -23,7 +24,17 @@ Player::Player(QWidget *parent)
     , coverLabel(0)
     , slider(0)
 {
-    QString ip_addr = "192.168.2.62";
+    //TO BE filled from settings
+    ip_addr = "192.168.2.62";
+    sql_user = "listen";
+    sql_pw = "1234";
+    sql_db = "ampache";
+    //TO BE filled from settings
+
+
+
+    m_sSettingsFile = QApplication::applicationDirPath()+ "settings.ini";
+    //loadSettings(); //fill ip, sql user, db and pw here
     setWindowTitle(tr("Zpotify") + QChar(0x2122));
     //! [create-objs]
     player = new QMediaPlayer(this);
@@ -48,14 +59,14 @@ Player::Player(QWidget *parent)
     connect(fileWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), SLOT(addToPlaylist(QTreeWidgetItem*)));
 
 
-//    //Cpp file:
-//    rclickAction = new QAction(tr("&Add all"), this);
-//    rclickAction->setStatusTip(tr("Options"));
-//    connect(rclickAction, SIGNAL(triggered()), this, SLOT(clearList()));
+    //    //Cpp file:
+    //    rclickAction = new QAction(tr("&Add all"), this);
+    //    rclickAction->setStatusTip(tr("Options"));
+    //    connect(rclickAction, SIGNAL(triggered()), this, SLOT(clearList()));
 
-//    // Then add it to your treeWidget:
-//        fileWidget->addAction(rclickAction);
-//          fileWidget->setContextMenuPolicy(Qt::ActionsContextMenu);
+    //    // Then add it to your treeWidget:
+    //        fileWidget->addAction(rclickAction);
+    //          fileWidget->setContextMenuPolicy(Qt::ActionsContextMenu);
 
 
     playlistModel = new PlaylistModel(this);
@@ -68,12 +79,14 @@ Player::Player(QWidget *parent)
     connectAct->setShortcut(tr("Ctrl+C"));
     connectAct->setStatusTip(tr("Ctrl+C"));
     menuBar->addAction(connectAct);
+
     connect(connectAct,SIGNAL(triggered()),this,SLOT(clearList()));
 
     clearAct = new QAction("Clear",menuBar);
     clearAct->setShortcut(Qt::Key_Delete);
     clearAct->setStatusTip(tr("Delete"));
     menuBar->addAction(clearAct);
+    //connectMenu->
     connect(clearAct,SIGNAL(triggered()),this,SLOT(clearList()));
 
     playlistView = new QListView(this);
@@ -143,12 +156,31 @@ Player::~Player()
 {
 }
 
+/*
+ * Load settings from the hardcoded .ini file
+ */
+void Player::loadSettings(){
+    QSettings settings(m_sSettingsFile, QSettings::NativeFormat);
+    QString sText = settings.value("text", "").toString();
+    //TODO : LOAD value from sText
+}
+
+/*
+ * Save settings to the hardcoded .ini file
+ */
+void Player::saveSettings(){
+    QSettings settings(m_sSettingsFile, QSettings::NativeFormat);
+    //TODO : fill sText
+    QString sText = "";
+    settings.setValue("text", sText);
+}
+
 int Player::getSQL(){
     QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
-    db.setHostName("192.168.2.62");
-    db.setDatabaseName("ampache");
-    db.setUserName("listen");
-    db.setPassword("1234");
+    db.setHostName(ip_addr);
+    db.setDatabaseName(sql_db);
+    db.setUserName(sql_user);
+    db.setPassword(sql_pw);
     if (!db.open())
     {
         QTextStream(stdout) << "User    : " + db.userName()     << endl;
@@ -177,7 +209,7 @@ void Player::addToPlaylist(QTreeWidgetItem* current)
     QTreeWidgetItem *songItem;
     switch (current->text(1).toInt()) {
     case -2:
-//        clearList();
+        //        clearList();
         for (int i = 0; i < current->childCount(); i++) {
             albumItem = current->child(i);
             for (int j = 0; j < albumItem->childCount(); j++) {
@@ -190,7 +222,7 @@ void Player::addToPlaylist(QTreeWidgetItem* current)
         }
         break;
     case -1:
-//        clearList();
+        //        clearList();
         for (int i = 0; i < current->childCount(); i++) {
             songItem = current->child(i);
             QString stringURL = "http://192.168.2.62/ampache/play/index.php?ssid=6931&type=song&oid="+songItem->text(1)+"&uid=2&name=/" + songItem->text(0);

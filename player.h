@@ -100,6 +100,8 @@ private:
     void handleCursor(QMediaPlayer::MediaStatus status);
     void updateDurationInfo(qint64 currentInfo);
     int getSQL();
+    void saveSettings();
+    void loadSettings();
 
     QMediaPlayer *player;
     QMediaPlaylist *playlist;
@@ -118,6 +120,11 @@ private:
     QString trackInfo;
     QString statusInfo;
     qint64 duration;
+    QString m_sSettingsFile;
+    QString ip_addr;
+    QString sql_user;
+    QString sql_pw;
+    QString sql_db;
 };
 
 #endif // PLAYER_H
