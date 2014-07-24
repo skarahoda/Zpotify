@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <qtextstream.h>
 #include <QSettings>
+#include <fstream>
 
 Player::Player(QWidget *parent)
     : QWidget(parent)
@@ -25,16 +26,13 @@ Player::Player(QWidget *parent)
     , coverLabel(0)
     , slider(0)
 {
-    //TO BE filled from settings
-    ip_addr  = "192.168.2.61";
-    sql_user = "listen";
-    sql_pw   = "1234";
+
     sql_db   = "ampache";
-    //TO BE filled from settings
+    m_sSettingsFile = QApplication::applicationDirPath()+ "/settings.ini";
 
+    loadSettings();
 
-
-    m_sSettingsFile = QApplication::applicationDirPath()+ "settings.ini";
+    //QTextStream(stdout) << m_sSettingsFile << endl;
     //loadSettings(); //fill ip, sql user, db and pw here
     setWindowTitle(tr("Zpotify") + QChar(0x2122));
     //! [create-objs]
@@ -162,9 +160,22 @@ Player::~Player()
  * Load settings from the hardcoded .ini file
  */
 void Player::loadSettings(){
-    QSettings settings(m_sSettingsFile, QSettings::NativeFormat);
-    QString sText = settings.value("text", "").toString();
-    //TODO : LOAD value from sText
+    QFile Fout(QApplication::applicationDirPath()+ "/settings.ini");
+    if (!Fout.exists())
+    {
+        //TO BE filled from settings
+        ip_addr  = "192.168.2.61";
+        sql_user = "listen";
+        sql_pw   = "1234";
+        //TO BE filled from settings
+        QTextStream(stdout) << "ini not found" << endl;
+        saveSettings();
+    }else{
+        QSettings settings(m_sSettingsFile, QSettings::NativeFormat);
+        ip_addr  = settings.value("ip",    "").toString();
+        sql_user = settings.value("s_usr", "").toString();
+        sql_pw   = settings.value("s_pw",  "").toString();
+    }
 }
 
 /*
@@ -173,8 +184,9 @@ void Player::loadSettings(){
 void Player::saveSettings(){
     QSettings settings(m_sSettingsFile, QSettings::NativeFormat);
     //TODO : fill sText
-    QString sText = "";
-    settings.setValue("text", sText);
+    settings.setValue("ip", ip_addr);
+    settings.setValue("s_usr", sql_user);
+    settings.setValue("s_pw", sql_pw);
 }
 
 int Player::getSQL(){
@@ -439,9 +451,10 @@ void Player::settings()
 {
     SettingsDialog dialog(ip_addr,sql_user,sql_pw,this);
     if(dialog.exec() == QDialog::Accepted) {
-         ip_addr=dialog.serverIP();
-         sql_user=dialog.username();
-         sql_pw=dialog.password();
-         getSQL();
+        ip_addr=dialog.serverIP();
+        sql_user=dialog.username();
+        sql_pw=dialog.password();
+        saveSettings();
+        getSQL();
     }
 }
