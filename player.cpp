@@ -443,9 +443,9 @@ QTreeWidgetItem * Player::addAlbum(QTreeWidgetItem * artist, const QString &albu
 
 void Player::clearList()
 {
-    setWindowTitle(tr("Zpotify") + QChar(0x2122));
     if(!playlist->clear())
         QMessageBox::warning(this, tr("List Error"),tr("QMediaPlaylist couldn't clear the list"));
+    setWindowTitle(tr("Zpotify") + QChar(0x2122));
 }
 
 void Player::settings()
