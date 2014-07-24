@@ -26,7 +26,7 @@ Player::Player(QWidget *parent)
     , slider(0)
 {
     //TO BE filled from settings
-    ip_addr  = "192.168.2.62";
+    ip_addr  = "192.168.2.61";
     sql_user = "listen";
     sql_pw   = "1234";
     sql_db   = "ampache";
