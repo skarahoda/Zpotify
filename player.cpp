@@ -436,7 +436,11 @@ void Player::clearList()
 
 void Player::settings()
 {
-    SettingsDialog dialog(this);
-    if(dialog.exec() == QDialog::Accepted)
-         QTextStream(stdout) << "All good\n";
+    SettingsDialog dialog(ip_addr,sql_user,sql_pw,this);
+    if(dialog.exec() == QDialog::Accepted) {
+         ip_addr=dialog.serverIP();
+         sql_user=dialog.username();
+         sql_pw=dialog.password();
+         getSQL();
+    }
 }

@@ -13,7 +13,7 @@ class SettingsDialog : public QDialog
 {
     Q_OBJECT
 public:
-    SettingsDialog(QWidget *parent = 0);
+    SettingsDialog(QString IP, QString userName, QString pass, QWidget *parent = 0);
     QString serverIP() const;
     QString username() const;
     QString password() const;
