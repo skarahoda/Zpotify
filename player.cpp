@@ -207,8 +207,9 @@ int Player::getSQL(){
     }
 
     QSqlQuery query;
-    QString qur = "UPDATE   ampache.session SET  expire =  1999999999 WHERE  session.id =  6931";
+    QString qur = "INSERT INTO `ampache`.`session` (`id`, `username`, `expire`, `value`, `ip`, `type`, `agent`) VALUES ('6931', NULL, '1999999999', '', NULL, 'stream', NULL) ON DUPLICATE KEY UPDATE `expire`='1999999999'";
     query.exec(qur);
+
     qur = "SELECT artist.name, album.name, song.title, song.id from song inner join album on album.id=song.album inner join artist on artist.id=song.artist order by artist.name, album.name, song.track";
 
     query.exec(qur);
