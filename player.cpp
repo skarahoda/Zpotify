@@ -178,6 +178,7 @@ void Player::saveSettings(){
 }
 
 int Player::getSQL(){
+    fileWidget->clear();
     QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
     db.setHostName(ip_addr);
     db.setDatabaseName(sql_db);
